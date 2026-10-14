@@ -1,0 +1,16 @@
+[Unit]
+Description=Pineapple-Pi NetworkManager inventory scan
+After=NetworkManager.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ghost0mod3
+Group=ghost0mod3
+WorkingDirectory=/opt/pineapple-pi
+EnvironmentFile=-/opt/pineapple-pi/.env
+ExecStart=/opt/pineapple-pi/venv/bin/python -m backend.cli scan
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/opt/pineapple-pi/database /opt/pineapple-pi/logs /opt/pineapple-pi/data

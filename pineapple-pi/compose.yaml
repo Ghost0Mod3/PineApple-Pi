@@ -1,0 +1,28 @@
+services:
+  pineapple-pi:
+    build: .
+    container_name: pineapple-pi
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      DATABASE_PATH: /app/database/pineapple_pi.db
+      FRONTEND_PATH: /app/frontend
+      MANAGEMENT_INTERFACE: wlan0
+      SCANNER_INTERFACE: wlan1
+      SCANNER_EXPECTED_MAC: 80:af:ca:eb:92:07
+      SCANNER_EXPECTED_DRIVER: rtw88_8822bu
+      ALLOW_ACTIVE_RADIO_CHANGES: "false"
+    volumes:
+      - pineapple_pi_database:/app/database
+      - /sys/class/net:/sys/class/net:ro
+      - /run/NetworkManager:/run/NetworkManager:ro
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+volumes:
+  pineapple_pi_database:
