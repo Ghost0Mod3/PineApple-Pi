@@ -1,4 +1,6 @@
-# Pineapple-Pi
+# Pineapple-Pi 
+<h>prototype<h/>
+
 
 Pineapple-Pi is a headless Raspberry Pi 4 wireless inventory appliance designed around the verified two-radio setup on `pineapplepi`:
 
