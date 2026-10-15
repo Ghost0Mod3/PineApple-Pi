@@ -1,9 +1,0 @@
-[project]
-name = "pineapple-pi"
-version = "0.1.0"
-description = "Two-radio Raspberry Pi wireless inventory appliance"
-requires-python = ">=3.11"
-
-[tool.pytest.ini_options]
-pythonpath = ["."]
-testpaths = ["tests"]
