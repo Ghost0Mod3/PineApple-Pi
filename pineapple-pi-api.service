@@ -1,0 +1,21 @@
+[Unit]
+Description=Pineapple-Pi API and dashboard
+After=network-online.target NetworkManager.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ghost0mod3
+Group=ghost0mod3
+WorkingDirectory=/opt/pineapple-pi
+EnvironmentFile=-/opt/pineapple-pi/.env
+ExecStart=/opt/pineapple-pi/venv/bin/uvicorn backend.main:app --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/opt/pineapple-pi/database /opt/pineapple-pi/logs /opt/pineapple-pi/data
+
+[Install]
+WantedBy=multi-user.target
