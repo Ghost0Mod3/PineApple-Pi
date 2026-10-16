@@ -1,135 +1,52 @@
-# Pineapple-Pi
+# PineApple-Pi v0.5.0-rc1
 
-Pineapple-Pi is a headless Raspberry Pi 4 wireless inventory appliance designed around the verified two-radio setup on `pineapplepi`:
+PineApple-Pi is a guided Raspberry Pi dashboard for authorized network inventory, system auditing, OSINT, radio visibility, automation, and service management.
 
-```text
-wlan0 = management, Raspberry Pi Connect, SSH, dashboard, updates
-wlan1 = Techkey AC1200 RTL88x2BU inventory scanner through NetworkManager
-```
+## Guided application interfaces
 
-## Safety boundary
+The browser dashboard provides visual configuration, review, results, history, health, and artifact views for:
 
-This release inventories nearby wireless access points using NetworkManager. It does not change radio modes, disconnect clients, impersonate access points, capture credentials, intercept traffic, or crack passwords.
+- Wireshark / TShark
+- tcpdump
+- Nmap
+- arp-scan
+- Lynis
+- Recon-ng
+- SpiderFoot
+- theHarvester
+- Meshtastic
+- RTL-SDR
+- Node-RED
+- Docker
 
-## Verified hardware
+No raw command box is exposed. The backend builds commands from allowlisted profiles, checks tool installation, requires authorization for assessment tools, applies timeouts, logs decisions, and stores artifacts under `data/artifacts/`.
 
-- Hostname: `pineapplepi`
-- Management interface: `wlan0`
-- Management driver: `brcmfmac`
-- Scanner interface: `wlan1`
-- Scanner USB ID: `0bda:b812`
-- Scanner MAC: `80:af:ca:eb:92:07`
-- Scanner driver: `rtw88_8822bu`
-- Scanner bands: 2.4 GHz and 5 GHz
-- Scan method: `nmcli device wifi list ifname wlan1 --rescan yes`
+## Release-candidate execution support
 
-## Before installation
+Enabled adapters: Nmap private-scope profiles, arp-scan on `wlan3`, Lynis local audit, Meshtastic read-only information, RTL-SDR hardware test, and restricted Docker service lifecycle actions.
 
-Confirm recovery access and radio mapping:
+GUI-only in this RC: Wireshark/TShark, tcpdump, Recon-ng, SpiderFoot, theHarvester, and Node-RED. Their interfaces and health checks are wired, but execution remains disabled until dedicated parsers and reviewed service manifests are added.
 
-```bash
-rpi-connect status
-nmcli device status
-ip route show default
-iw dev
-```
-
-Expected management route:
-
-```text
-default ... dev wlan0
-```
-
-## Native installation
+## Development test
 
 ```bash
-unzip pineapple-pi-v0.1.0.zip
-cd pineapple-pi
-chmod +x install.sh update.sh uninstall.sh scripts/*.sh
-sudo ./install.sh
-```
-
-The installer copies the project to `/opt/pineapple-pi`, creates an isolated Python environment, initializes SQLite, and installs three units:
-
-- `pineapple-pi-api.service`
-- `pineapple-pi-scan.service`
-- `pineapple-pi-scan.timer`
-
-It does not modify NetworkManager profiles, `wlan0`, routes, DNS, firewall rules, SSH, or Raspberry Pi Connect.
-
-## Dashboard
-
-Open:
-
-```text
-http://pineapplepi.local:8000
-```
-
-API documentation:
-
-```text
-http://pineapplepi.local:8000/docs
-```
-
-## Useful commands
-
-```bash
-systemctl status pineapple-pi-api --no-pager
-systemctl status pineapple-pi-scan.timer --no-pager
-sudo systemctl start pineapple-pi-scan.service
-journalctl -u pineapple-pi-api -n 100 --no-pager
-journalctl -u pineapple-pi-scan -n 100 --no-pager
-```
-
-## Docker alternative
-
-Use either native services or Docker, not both at once:
-
-```bash
-sudo systemctl disable --now pineapple-pi-api pineapple-pi-scan.timer
-docker compose up -d --build
-```
-
-Docker dashboard:
-
-```text
-http://pineapplepi.local:8000
-```
-
-The Docker API can display host radio status. Scheduled host scanning remains a native systemd function because NetworkManager controls `wlan1` on the host.
-
-## Recovery
-
-Stop only Pineapple-Pi:
-
-```bash
-sudo ./scripts/safe_stop.sh
-```
-
-Verify recovery access:
-
-```bash
-./scripts/preflight.sh
-```
-
-Uninstall Pineapple-Pi without changing Raspberry Pi Connect or network configuration:
-
-```bash
-sudo ./uninstall.sh
-```
-
-## Privacy
-
-Wireless inventories include SSIDs and BSSIDs. Database files, logs, exports, backups, and raw scans are excluded from Git. Do not publish inventory data.
-
-## Development
-
-```bash
-cp .env.example .env
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements-dev.txt
+cp .env.example .env
 python -m backend.cli init-db
 pytest -q
-uvicorn backend.main:app --host 0.0.0.0 --port 8000
+uvicorn backend.main:app --host 0.0.0.0 --port 8001
 ```
+
+Open `http://PI-MANAGEMENT-IP:8001`.
+
+## Optional base tools
+
+Review the script before running:
+
+```bash
+sudo ./scripts/install-tools.sh
+```
+
+Only use assessment workflows on systems and networks you own or have explicit authorization to test.
