@@ -1,7 +1,0 @@
-[project]
-name="pineapple-pi"
-version="0.5.0rc1"
-requires-python=">=3.11"
-[tool.pytest.ini_options]
-pythonpath=["."]
-testpaths=["tests"]
