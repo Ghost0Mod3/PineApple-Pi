@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+TOKEN=/run/pineapple-pi-install.token;LOCK=/run/lock/pineapple-pi-tool-install.lock
+[[ -r /etc/pineapple-pi-installer.conf ]] && source /etc/pineapple-pi-installer.conf
+user=${INSTALL_USER:-ghost0mod3};die(){ echo "[installer] ERROR: $*" >&2;exit 1; }
+[[ $EUID -eq 0 ]]||die 'must run as root'
+issue(){ t=$(tr -dc A-Z0-9 </dev/urandom|head -c8);echo "$t">$TOKEN;chmod 600 $TOKEN;echo "Installation token: $t";echo 'Valid once for 10 minutes.';(sleep 600;rm -f $TOKEN)& }
+verify(){ [[ -f $TOKEN ]]||die 'token missing or expired';[[ "$1" == "$(cat $TOKEN)" ]]||die 'invalid token';rm -f $TOKEN; }
+apt_i(){ export DEBIAN_FRONTEND=noninteractive;apt-get update;apt-get install -y --no-install-recommends "$@"; }
+install_tool(){ verify "$2";exec 9>$LOCK;flock -n 9||die 'another install is running';case "$1" in wireshark)apt_i tshark;;tcpdump)apt_i tcpdump;;nmap)apt_i nmap;;arpscan)apt_i arp-scan;;lynis)apt_i lynis;;rtlsdr)apt_i rtl-sdr;;docker)apt_i docker.io;systemctl enable --now docker;;meshtastic)apt_i pipx python3-venv;/usr/bin/pipx install --global --force 'meshtastic[cli]';;*)die 'tool not allowlisted';;esac;echo "[installer] completed: $1"; }
+case ${1:-} in issue-token)issue;;install)[[ $# -eq 3 ]]||die 'usage install ID TOKEN';install_tool "$2" "$3";;*)die 'use issue-token or install ID TOKEN';;esac
